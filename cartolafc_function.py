@@ -7,6 +7,7 @@
 #
 import sys
 import os
+import datetime
 import requests
 import json
 import urllib.request
@@ -14,14 +15,27 @@ import urllib.request
 #
 # Contatando a API do CartolaFC
 #
+horaInicial = datetime.datetime.now()
 
+print("\nContatando API do CartolaFC...\n")
 
-with urllib.request.urlopen("https://api.cartolafc.globo.com/atletas/mercado") as url:
-    data = json.loads(url.read().decode())
+#with urllib.request.urlopen("https://api.cartolafc.globo.com/atletas/mercado") as url:
+#    data = json.loads(url.read().decode())
+
+data = requests.get('https://api.cartolafc.globo.com/atletas/mercado', verify=True).json()
+
+horaFinal= datetime.datetime.now()
+tempoGasto = horaFinal - horaInicial
+
+print('\nPronto em: {0}\n'.format(tempoGasto))
 
 #
 # Leitura e preparação dos dados de mercado.json
 #
+
+horaInicial = datetime.datetime.now()
+print("\nPreparando dados...\n")
+
 #cartola = open('/home/lacs/Documentos/mercado.json', 'r')
 #cartola_json = json.loads(cartola.read())
 cartola_json = data
@@ -30,9 +44,16 @@ atletas = cartola_json['atletas']
 posicoes = cartola_json['posicoes']
 status = cartola_json['status']
 
+print("\nCalculando pontuação dos atletas e técnicos...\n")
+
+atletas = sorted (atletas, key=lambda a: a['jogos_num'] * a['media_num'],reverse=True)
+
 #
 # Listas por posição com os atletas
 #
+
+print("\nOrganizando atletas mais pontuados por posição...\n")
+
 for a in atletas:
     goleiros = [a for a in atletas if a["posicao_id"] == 1]
     laterais = [a for a in atletas if a["posicao_id"] == 2]
@@ -41,15 +62,36 @@ for a in atletas:
     atacantes = [a for a in atletas if a["posicao_id"] == 5]
     tecnicos = [a for a in atletas if a["posicao_id"] == 6]
 
+horaFinal= datetime.datetime.now()
+tempoGasto = horaFinal - horaInicial
+
+print('\nPronto em: {0}\n'.format(tempoGasto))
+
 #
 # Seleção dos cinco maiores pontuadores por posição
 #
+"""
 goleiros = sorted (goleiros, key=lambda a: a['jogos_num'] * a['media_num'],reverse=True)[0:1]
 laterais = sorted (laterais, key=lambda a: a['jogos_num'] * a['media_num'],reverse=True)[0:2]
 zagueiros = sorted (zagueiros, key=lambda a: a['jogos_num'] * a['media_num'],reverse=True)[0:5]
 meias = sorted (meias, key=lambda a: a['jogos_num'] * a['media_num'],reverse=True)[0:5]
 atacantes = sorted (atacantes, key=lambda a: a['jogos_num'] * a['media_num'],reverse=True)[0:3]
 tecnicos = sorted (tecnicos, key=lambda a: a['jogos_num'] * a['media_num'],reverse=True)[0:1]
+"""
+
+#
+# Função menu
+#
+
+def menu():
+    print("Esquemas Táticos Disponíveis:\n")
+    print("Digite '1' para o esquema 3-4-3\n")
+    print("Digite '2' para o esquema 3-5-2\n")
+    print("Digite '3' para o esquema 4-3-3\n")
+    print("Digite '4' para o esquema 4-4-2\n")
+    print("Digite '5' para o esquema 4-5-1\n")
+    print("Digite '6' para o esquema 5-3-2\n")
+    print("Digite '7' para o esquema 5-4-1\n")
 
 #
 # Função para selecionar jogadores de cada posição
@@ -234,6 +276,7 @@ def select_esquema(esquema):
         selecao.append(jogador("atacantes"))
         selecao.append(jogador("tecnicos"))
         return selecao
+
 
 
 """
